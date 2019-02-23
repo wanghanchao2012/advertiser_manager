@@ -1,0 +1,19 @@
+package com.emarbox.entity;
+
+import lombok.Data;
+
+import javax.persistence.Table;
+
+@Data
+@Table(name="pig_project_version_map_info")
+public class ProjectVersionMapInfo {
+
+    private Long id;
+
+
+    private Long v1ProjectId;
+
+
+    private Long v2ProjectId;
+
+}

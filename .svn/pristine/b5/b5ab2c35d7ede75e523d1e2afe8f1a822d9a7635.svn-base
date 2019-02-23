@@ -1,0 +1,50 @@
+package com.emarbox.dao;
+
+import com.emarbox.dto.ProjectInfoQuery;
+import com.emarbox.entity.ProjectInfo;
+import com.emarbox.mapper.MapperAuthProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import tk.mybatis.mapper.entity.Example;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public class ProjectInfoDao {
+
+    @Autowired
+    MapperAuthProvider mapperProvider;
+
+    public List<ProjectInfo> getListByPage(ProjectInfoQuery query) {
+        return mapperProvider.getProjectInfoMapper().getListByPage(query);
+    }
+
+    public Integer getCountByPage(ProjectInfoQuery query) {
+        return Optional.ofNullable(mapperProvider.getProjectInfoMapper().getCountByPage(query)).orElse(0);
+    }
+
+    public ProjectInfo getProjectInfo(Long projectId) {
+        Example example = new Example(ProjectInfo.class);
+        example.createCriteria().andEqualTo("id",projectId);
+        return mapperProvider.getProjectInfoMapper().selectOneByExample(example);
+    }
+
+    public List<ProjectInfo> getProjectAll() {
+        return mapperProvider.getProjectInfoMapper().selectAll();
+    }
+
+    public boolean edit(ProjectInfo record) {
+        Example example = new Example(ProjectInfo.class);
+        example.createCriteria().andEqualTo("id",record.getId());
+        return mapperProvider.getProjectInfoMapper().updateByExample(record,example) > 0;
+    }
+
+
+    public ProjectInfo add(ProjectInfo record) {
+        mapperProvider.getProjectInfoMapper().insertUseGeneratedKeys(record);
+        return record;
+    }
+
+
+}

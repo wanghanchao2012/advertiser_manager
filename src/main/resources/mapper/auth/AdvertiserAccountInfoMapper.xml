@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.emarbox.mapper.auth.PigAdvertiserAccountInfoMapper">
+
+	<update id="rechargeBalance" parameterType="com.emarbox.entity.AdvertiserAccountInfo">
+		update pig_advertiser_account_info
+		<set>
+			<if test="cashBalance!=null">
+				cash_balance=cash_balance+#{cashBalance}
+			</if>
+			<if test="giftBalance!=null">
+				gift_balance=gift_balance+#{giftBalance}
+			</if>
+		</set>
+		<where>
+			<if test="advertiserId!=null">
+				advertiser_id=#{advertiserId}
+			</if>
+		</where>
+	</update>
+
+</mapper>

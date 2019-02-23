@@ -1,0 +1,20 @@
+package com.emarbox.dao;
+
+import com.emarbox.entity.ProjectCertificate;
+import com.emarbox.mapper.MapperAuthProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class ProjectCertificateDao {
+    @Autowired
+    MapperAuthProvider mapperProvider;
+
+    public boolean insert(ProjectCertificate record) {
+        return mapperProvider.getProjectCertificateMapper().insert(record) > 0;
+    }
+
+    public ProjectCertificate getProjectCertificate(ProjectCertificate query) {
+        return mapperProvider.getProjectCertificateMapper().selectOne(query);
+    }
+}

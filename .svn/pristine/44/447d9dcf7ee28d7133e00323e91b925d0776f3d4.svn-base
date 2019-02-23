@@ -1,0 +1,21 @@
+package com.emarbox.dao.compatible;
+
+import com.emarbox.entity.ProjectVersionMapInfo;
+import com.emarbox.mapper.auth.ProjectVersionMapInfoMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import tk.mybatis.mapper.entity.Example;
+
+@Repository
+public class ProjectVersionMapInfoDao {
+    @Autowired
+    public ProjectVersionMapInfoMapper projectVersionMapInfoMapper;
+
+    public ProjectVersionMapInfo getProjectVersionMapInfo(Long projectIdV2) {
+        Example example = new Example(ProjectVersionMapInfo.class);
+        example.createCriteria().andEqualTo("v2ProjectId", projectIdV2);
+        return projectVersionMapInfoMapper.selectOneByExample(example);
+    }
+
+
+}

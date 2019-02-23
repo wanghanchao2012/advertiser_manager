@@ -1,0 +1,104 @@
+package com.emarbox.controller;
+
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.emarbox.dto.AdvertiserOptionItemVo;
+import com.emarbox.dto.ProjectInfoQuery;
+import com.emarbox.dto.common.OptionItemVo;
+import com.emarbox.dto.common.ResponseResult;
+import com.emarbox.dto.common.TreeVo;
+import com.emarbox.entity.ProjectInfo;
+import com.emarbox.enums.PlatformType;
+import com.emarbox.service.ServiceProvider;
+import com.google.common.collect.ImmutableMap;
+
+@Controller
+@RequestMapping("/account/project")
+public class ProjectInfoController {
+
+    @Autowired
+    ServiceProvider serviceProvider;
+
+    @RequestMapping("/list")
+    @ResponseBody
+    public ResponseResult<List<ProjectInfo>> list(@RequestBody ProjectInfoQuery query) {
+        return serviceProvider.getProjectInfoService().getPage(query);
+    }
+
+
+    @RequestMapping(value="/search/source", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseResult<Map<String, Object>> searchSource() {
+        Map<String, Object> source = new HashMap<>();
+        List<OptionItemVo> projectOptions = serviceProvider.getProjectInfoService().getProjectOptions();
+        List<OptionItemVo> agentInfos = serviceProvider.getAgentInfoService().getAgentInfos();
+        List<AdvertiserOptionItemVo> advertiserOptions = serviceProvider.getAdvertiserInfoService().getAdvertiserOptions();
+        source.put("project_info_list",projectOptions);
+        source.put("agent_name_list", agentInfos);
+        source.put("advertiser_info_list", advertiserOptions);
+        source.put("salesman_list", ImmutableMap.of("10001", "(10001)成晓艳", "10002", "高小"));
+        source.put("department_list", ImmutableMap.of("10001", "移动一部", "10002", "移动二部"));
+        return ResponseResult.<Map<String, Object>>builder().data(source).build().forOk();
+    }
+
+
+    @RequestMapping(value="/todoedit", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseResult<Map<String, Object>> todoEdit(@RequestParam(value = "projectId", required = false) Long projectId) {
+        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> source = new HashMap<>();
+        List<OptionItemVo> platformList = EnumSet.allOf(PlatformType.class).stream().map(e->OptionItemVo.builder().value(e.getIndex()).text(e.getDesc()).build()).collect(Collectors.toList());
+        List<AdvertiserOptionItemVo> advertiserOptions = serviceProvider.getAdvertiserInfoService().getAdvertiserOptions();
+        ProjectInfo projectInfo = null;
+        if (Objects.nonNull(projectId)) {
+            projectInfo = serviceProvider.getProjectInfoService().getProjectInfo(projectId);
+        }
+        source.put("platform", platformList);
+        source.put("salesman", ImmutableMap.of("10001", "(10001)成晓艳", "10002", "高小"));
+        source.put("department", ImmutableMap.of("10001", "移动一部", "10002", "移动二部"));
+        source.put("advertiser", advertiserOptions);
+        result.put("source", source);
+        result.put("info", projectInfo);
+        return ResponseResult.<Map<String, Object>> builder().data(result).build().forOk();
+    }
+
+
+    @RequestMapping("/industry")
+    @ResponseBody
+    public ResponseResult<Object> industry(Long platformId) {
+        List<TreeVo> industryOptions = serviceProvider.getPlatformIndustryInfoService().getIndustryOptions(platformId);
+        return ResponseResult.builder().data(industryOptions).build().forOk();
+    }
+
+
+    @RequestMapping(value="/doedit", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseResult<String> doEdit(Long curd,@RequestBody ProjectInfo projectInfo) {
+        projectInfo.setCurrentUserId(curd);
+        ResponseResult<String> result = serviceProvider.getProjectInfoService().edit(projectInfo);
+        return result;
+    }
+
+
+    @RequestMapping(value="/doadd", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseResult<String> doAdd(Long curd,@RequestBody ProjectInfo projectInfo) {
+        projectInfo.setCurrentUserId(curd);
+        ResponseResult<String> result  = serviceProvider.getProjectInfoService().add(projectInfo);
+        return result;
+    }
+
+}

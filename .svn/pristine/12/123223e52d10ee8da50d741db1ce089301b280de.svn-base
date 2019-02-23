@@ -1,0 +1,64 @@
+package com.emarbox.dao;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import com.emarbox.entity.nonstandard.NonstandardAd;
+import com.emarbox.entity.nonstandard.NonstandardAdInfo;
+import com.emarbox.entity.nonstandard.NonstandardMedia;
+import com.emarbox.entity.nonstandard.NonstandardTracking;
+import com.emarbox.mapper.nonstandard.NonstandardAdInfoMapper;
+import com.emarbox.mapper.nonstandard.NonstandardAdMapper;
+import com.emarbox.mapper.nonstandard.NonstandardMediaMapper;
+import com.emarbox.mapper.nonstandard.NonstandardTrackingMapper;
+
+import lombok.Data;
+import tk.mybatis.mapper.entity.Example;
+
+@Data
+@Repository
+public class NonstandardAdDao {
+
+    @Autowired
+    private NonstandardAdInfoMapper nonstandardAdInfoMapper;
+    @Autowired
+    private NonstandardAdMapper nonstandardAdMapper;
+    @Autowired
+    private NonstandardMediaMapper nonstandardMediaMapper;
+    @Autowired
+    private NonstandardTrackingMapper nonstandardTrackingMapper;
+
+    public List<NonstandardAd> getList() {
+    	Example example = new Example(NonstandardAd.class);
+    	example.setOrderByClause("id desc");
+        return nonstandardAdMapper.selectByExample(example);
+    }
+    
+    public List<NonstandardMedia> getAdMediaAll(){
+    	return nonstandardMediaMapper.selectAll();
+    }
+    
+    public NonstandardTracking queryNonstandardTracking(NonstandardTracking nt){
+    	List<NonstandardTracking> list = nonstandardTrackingMapper.select(nt);
+    	if(null != list && list.size() > 0){
+    		return list.get(0);
+    	}
+    	return null;
+    }
+    
+    public NonstandardAd saveNonstandardAd(NonstandardAd ad){
+    	nonstandardAdMapper.insertUseGeneratedKeys(ad);
+    	return ad;
+    }
+    
+    public int saveNonstandardAdInfo(NonstandardAdInfo nai){
+    	return nonstandardAdInfoMapper.insert(nai);
+    }
+    
+    public int saveNonstandardTracking(NonstandardTracking nt){
+    	return nonstandardTrackingMapper.insert(nt);
+    }
+
+}

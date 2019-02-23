@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.emarbox.mapper.auth.EmarboxProjectMapper">
+    <select id="getListByPage" resultType="com.emarbox.entity.EmarboxProject" parameterType="com.emarbox.dto.ProjectInfoQuery">
+        SELECT
+            ai.project_id id,
+            ai.user_id,
+            ai.user_type,
+            ai.project_name,
+            ai.project_url,
+            ai.project_memo,
+            ai.linkman,
+            ai.telphone,
+            ai.mobile,
+            ai.email,
+            ai.deleted,
+            ai.create_time,
+            ai.create_user,
+            ai.update_time,
+            ai.update_user,
+            ai.project_code,
+            ai.project_cat_id,
+            ai.site_type_code,
+            ai.is_agent,
+            ai.area_code,
+            ai.brand_name,
+            ai.related_qq,
+            ai.supervisor,
+            ai.sales,
+            ai.org_id,
+            ai.pig_advertiser_id advertiserId,
+            ai.pig_salesman_id salesmanId,
+            ai.pig_department_id departmentId,
+            ai.pig_license_code licenseCode,
+            ai.pig_platform_id platformId,
+            ai.pig_category_type categoryType,
+            ai.pig_sub_category_type subCategoryType,
+            (select industry_name from pig_platform_industry_info where industry_id = ai.pig_category_type) categoryName,
+            (select industry_name from pig_platform_industry_info where industry_id = ai.pig_sub_category_type) subCategoryName,
+            ai.pig_status status ,
+            pai.advertiser_name,
+            aai.cash_balance,
+            aai.gift_balance
+        FROM
+        emarbox_project ai
+        left join pig_advertiser_info pai on pai.id = ai.pig_advertiser_id
+        left join pig_agent_info agent_info on agent_info.id = pai.agent_id
+        LEFT JOIN pig_agent_account_info aai on aai.agent_id = agent_info.id
+        WHERE 1=1
+        <if test="projectName != null and projectName!=''">
+            AND ai.project_id = #{projectName}
+        </if>
+        <if test="advertiserName != null and advertiserName!=''">
+            AND ai.pig_advertiser_id = #{advertiserName}
+        </if>
+        <if test="agentName != null and agentName!=''">
+            AND agent_info.id = #{agentName}
+        </if>
+        <if test="salesmanId != null and salesmanId!=''">
+            AND ai.pig_salesman_id = #{salesmanId}
+        </if>
+        <if test="departmentId != null and departmentId!=''">
+            AND ai.pig_department_id = #{departmentId}
+        </if>
+        order by ai.project_id desc
+        LIMIT #{page.offset},#{page.pageSize}
+    </select>
+    <select id="getCountByPage" resultType="java.lang.Integer" parameterType="com.emarbox.dto.ProjectInfoQuery">
+        SELECT
+            count(1) count
+        FROM
+        emarbox_project ai
+        left join pig_advertiser_info pai on pai.id = ai.pig_advertiser_id
+        left join pig_agent_info agent_info on agent_info.id = pai.agent_id
+        LEFT JOIN pig_agent_account_info aai on aai.agent_id = agent_info.id
+        WHERE 1=1
+        <if test="projectName != null and projectName!=''">
+            AND ai.project_id = #{projectName}
+        </if>
+        <if test="advertiserName != null and advertiserName!=''">
+            AND ai.pig_advertiser_id = #{advertiserName}
+        </if>
+        <if test="agentName != null and agentName!=''">
+            AND agent_info.id = #{agentName}
+        </if>
+        <if test="salesmanId != null and salesmanId!=''">
+            AND ai.pig_salesman_id = #{salesmanId}
+        </if>
+        <if test="departmentId != null and departmentId!=''">
+            AND ai.pig_department_id = #{departmentId}
+        </if>
+    </select>
+
+    <select id="getProjectInfo" resultType="com.emarbox.entity.EmarboxProject" parameterType="com.emarbox.entity.EmarboxProject">
+        SELECT
+             ppi.project_id,
+             ppi.user_id,
+             ppi.user_type,
+             ppi.project_name,
+             ppi.project_url,
+             ppi.project_memo,
+             ppi.linkman,
+             ppi.telphone,
+             ppi.mobile,
+             ppi.email,
+             ppi.deleted,
+             ppi.create_time,
+             ppi.create_user,
+             ppi.update_time,
+             ppi.update_user,
+             ppi.project_code,
+             ppi.project_cat_id,
+             ppi.site_type_code,
+             ppi.is_agent,
+             ppi.area_code,
+             ppi.brand_name,
+             ppi.related_qq,
+             ppi.supervisor,
+             ppi.sales,
+             ppi.org_id,
+             ppi.pig_advertiser_id advertiserId,
+             ppi.pig_salesman_id salesmanId,
+             ppi.pig_department_id departmentId,
+             ppi.pig_license_code licenseCode,
+             ppi.pig_platform_id platformId,
+             ppi.pig_category_type categoryType,
+             ppi.pig_sub_category_type subCategoryType,
+             (select industry_name from pig_platform_industry_info where industry_id = ppi.pig_category_type) categoryName,
+             (select industry_name from pig_platform_industry_info where industry_id = ppi.pig_sub_category_type) subCategoryName,
+             ppi.pig_status `status`,
+             pai.advertiser_name
+        FROM
+            emarbox_project ppi
+        LEFT JOIN pig_advertiser_info pai ON ppi.pig_advertiser_id = pai.id
+        where ppi.project_id = #{id}
+    </select>
+</mapper>

@@ -1,0 +1,78 @@
+package com.emarbox.entity;
+
+import com.emarbox.enums.QualificationType;
+import com.emarbox.enums.StatusType;
+import lombok.Data;
+
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.stream.Collectors;
+
+@Table(name = "pig_agent_info")
+@Data
+public class AgentInfo {
+
+    private Long id;
+
+    //代理商名称
+    private String agentName;
+
+    //公司名称
+    private String corporation;
+
+    //开户时间
+    private Date openAccountTime;
+
+    //邮件
+    private String email;
+
+    //资质类型
+    private String qualificationType;
+
+    //资质图片
+    private String qualificationImg;
+
+    //资质编号
+    private String qualificationCode;
+
+    //联系人
+    private String linkMan;
+
+    private String phoneNumber;
+    /**
+     * 待审核：pending，审核通过：normal，拒绝：reject
+     */
+    private String status;
+
+    private Date createTime;
+
+    private Date updateTime;
+
+    private String createUser;
+
+    private String updateUser;
+
+    public String getStatusText() {
+        return StatusType.valueOf(status).getDesc();
+    }
+
+    @Transient
+    private String statusText;
+
+    public String getQualificationTypeText() {
+        return EnumSet.allOf(QualificationType.class).stream()
+                .filter(e->e.getIndex().equals(Integer.parseInt(qualificationType)))
+                .map(e->e.getDesc())
+                .collect(Collectors.joining(","));
+    }
+
+
+    @Transient
+    private String qualificationTypeText;
+    @Transient
+    private Double cashBalance;
+    @Transient
+    private Double giftBalance;
+}

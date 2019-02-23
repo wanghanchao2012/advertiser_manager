@@ -1,0 +1,165 @@
+package com.emarbox.dao.compatible;
+
+import com.emarbox.entity.AdvertiserInfo;
+import com.emarbox.entity.EmarboxProject;
+import com.emarbox.entity.ProjectInfo;
+import com.emarbox.entity.ProjectVersionMapInfo;
+import com.emarbox.entity.compatible.EmarboxProjectModule;
+import com.emarbox.entity.compatible.EmarboxUser;
+import com.emarbox.entity.compatible.EmarboxUserProject;
+import com.emarbox.mapper.MapperAuthProvider;
+import com.emarbox.util.AliasUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Example;
+
+import java.util.Date;
+import java.util.Objects;
+
+@Repository
+public class EmarboxProjectDao {
+
+    @Autowired
+    MapperAuthProvider mapperAuthProvider;
+    @Autowired
+    NamedParameterJdbcTemplate namedParameterDspJdbcTemplate;
+
+    @Transactional
+    public EmarboxProject updateEmarboxProject(ProjectInfo projectInfo) {
+        if (Objects.isNull(projectInfo.getId())) {
+            return null;
+        }
+
+        Example example = new Example(EmarboxProject.class);
+        example.createCriteria().andEqualTo("userId", projectInfo.getCurrentUserId());
+        EmarboxUser emarboxUser = mapperAuthProvider.getEmarboxUserMapper().selectOneByExample(example);
+
+
+        EmarboxProject emarboxProject = new EmarboxProject();
+        emarboxProject.setId(projectInfo.getProjectIdV1());
+        buildEmarboxProjectBean(false, projectInfo, emarboxProject, emarboxUser);
+
+        SqlParameterSource sqlParam = new BeanPropertySqlParameterSource(emarboxProject);
+
+        namedParameterDspJdbcTemplate.update(updateEmarboxProjectSql(), sqlParam);
+        return emarboxProject;
+    }
+
+    @Transactional
+    public EmarboxProject generateEmarboxProject(ProjectInfo projectInfo) {
+
+        Example example = new Example(EmarboxProject.class);
+        example.createCriteria().andEqualTo("userId", projectInfo.getCurrentUserId());
+        EmarboxUser emarboxUser = mapperAuthProvider.getEmarboxUserMapper().selectOneByExample(example);
+
+        EmarboxProject emarboxProject = new EmarboxProject();
+        buildEmarboxProjectBean(true, projectInfo, emarboxProject, emarboxUser);
+
+        mapperAuthProvider.getEmarboxProjectMapper().insertUseGeneratedKeys(emarboxProject);
+
+        String projectCode = AliasUtil.encode(emarboxProject.getId());
+        emarboxProject.setId(emarboxProject.getId());
+        emarboxProject.setProjectCode(projectCode);
+
+        SqlParameterSource updateSqlParam = new BeanPropertySqlParameterSource(emarboxProject);
+        namedParameterDspJdbcTemplate.update(updateProjectCodeSql(), updateSqlParam);
+        projectUserRelation(emarboxProject, emarboxUser);
+        projectVersionRelation(emarboxProject.getId(), projectInfo.getId());
+        return emarboxProject;
+    }
+
+    private void buildEmarboxProjectBean(boolean isAdd, ProjectInfo projectInfo, EmarboxProject emarboxProject, EmarboxUser emarboxUser) {
+        Example advertiserExample = new Example(AdvertiserInfo.class);
+        advertiserExample.createCriteria().andEqualTo("id", projectInfo.getAdvertiserId());
+        AdvertiserInfo advertiserInfo = mapperAuthProvider.getAdvertiserInfoMapper().selectOneByExample(advertiserExample);
+        emarboxProject.setUserId(projectInfo.getCurrentUserId());
+        if (isAdd) {
+            emarboxProject.setCreateTime(new Date());
+            emarboxProject.setCreateUser("advertiser_manager");
+        } else {
+            emarboxProject.setUpdateTime(new Date());
+            emarboxProject.setUpdateUser("advertiser_manager");
+        }
+        emarboxProject.setProjectName(projectInfo.getProjectName());
+        emarboxProject.setUserType("user");
+        emarboxProject.setSiteTypeCode("independent");
+
+        emarboxProject.setLinkman(advertiserInfo.getLinkMan());
+        emarboxProject.setMobile(advertiserInfo.getPhoneNumber());
+        emarboxProject.setProjectUrl(advertiserInfo.getCompanyWebsite());
+        emarboxProject.setDeleted(0L);
+        emarboxProject.setUserId(emarboxUser.getUserId());
+    }
+
+    public boolean projectUserRelation(EmarboxProject emarboxProject, EmarboxUser emarboxUser) {
+
+        Example delUserProjectExample = new Example(EmarboxUserProject.class);
+        delUserProjectExample.createCriteria().andEqualTo("userId", emarboxProject.getUserId()).andEqualTo("projectId", emarboxProject.getId()).andEqualTo("moduleId", 3);
+        mapperAuthProvider.getEmarboxUserProjectMapper().deleteByExample(delUserProjectExample);
+        EmarboxUserProject emarboxUserProject = new EmarboxUserProject();
+        emarboxUserProject.setCreateTime(new Date());
+        emarboxUserProject.setCreateUser("advertiser_manage");
+        emarboxUserProject.setModuleId(3L);
+        emarboxUserProject.setProjectId(emarboxProject.getId());
+        emarboxUserProject.setUserType(emarboxUser == null ? "sub_user" : emarboxUser.getUserType());
+        emarboxUserProject.setUserId(emarboxUser.getUserId());
+        boolean addUserProjectIsOK = mapperAuthProvider.getEmarboxUserProjectMapper().insert(emarboxUserProject) > 0;
+
+        Example delUserProjectModuleExample = new Example(EmarboxProjectModule.class);
+        delUserProjectModuleExample.createCriteria().andEqualTo("projectId", emarboxProject.getId()).andEqualTo("moduleId", 3);
+        mapperAuthProvider.getEmarboxProjectModuleMapper().deleteByExample(delUserProjectModuleExample);
+        EmarboxProjectModule emarboxProjectModule = new EmarboxProjectModule();
+        emarboxProjectModule.setCreateTime(new Date());
+        emarboxProjectModule.setCreateUser("advertiser_manage");
+        emarboxProjectModule.setProjectId(emarboxProject.getId());
+        emarboxProjectModule.setModuleId(3L);
+        boolean addProjectModuleIsOk = mapperAuthProvider.getEmarboxProjectModuleMapper().insert(emarboxProjectModule) > 0;
+        return addUserProjectIsOK && addProjectModuleIsOk;
+    }
+
+    public boolean projectVersionRelation(Long projectIdV1, Long projectIdV2) {
+        Example example = new Example(ProjectVersionMapInfo.class);
+        example.createCriteria().andEqualTo("v1ProjectId", projectIdV1).andEqualTo("v2ProjectId", projectIdV2);
+        mapperAuthProvider.getProjectVersionMapInfoMapper().deleteByExample(example);
+        ProjectVersionMapInfo projectInfo = new ProjectVersionMapInfo();
+        projectInfo.setV1ProjectId(projectIdV1);
+        projectInfo.setV2ProjectId(projectIdV2);
+        return mapperAuthProvider.getProjectVersionMapInfoMapper().insert(projectInfo) > 0;
+    }
+
+    private String updateProjectCodeSql() {
+        StringBuffer sql = new StringBuffer();
+        sql.append("update emarbox_project ").append("\n");
+        sql.append(" set project_code=:projectCode ").append("\n");
+        sql.append(" where project_id=:id ").append("\n");
+        sql.append("  and user_id=:userId ").append("\n");
+        sql.append("  and user_type=:userType ").append("\n");
+        sql.append("  and project_name=:projectName ").append("\n");
+        return sql.toString();
+    }
+
+    public String updateEmarboxProjectSql() {
+        StringBuffer sql = new StringBuffer();
+        sql.append(" update emarbox_project p set  ").append("\n");
+        sql.append(" p.project_name = :projectName ").append("\n");
+        sql.append(" ,p.project_url = :projectUrl ").append("\n");
+        sql.append(" ,p.linkman = :linkman ").append("\n");
+        sql.append(" ,p.mobile = :mobile ").append("\n");
+        sql.append(" ,p.email = :email ").append("\n");
+        sql.append(" ,p.project_memo = :projectMemo ").append("\n");
+        sql.append(" ,p.project_cat_id = :projectCatId ").append("\n");
+        sql.append(" ,p.site_type_code = :siteTypeCode ").append("\n");
+        sql.append(" ,p.area_code = :areaCode ").append("\n");
+        sql.append(" ,p.brand_name = :brandName ").append("\n");
+        sql.append(" ,p.related_qq = :relatedQq ").append("\n");
+        sql.append(" ,p.update_time = :updateTime ").append("\n");
+        sql.append(" ,p.update_user = :updateUser ").append("\n");
+        sql.append(" where p.project_id = :id ");
+        return sql.toString();
+    }
+
+}

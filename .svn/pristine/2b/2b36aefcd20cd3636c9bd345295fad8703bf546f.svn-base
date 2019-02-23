@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.emarbox.mapper.auth.AdvertiserInfoMapper">
+    <select id="getListByPage" resultType="com.emarbox.entity.AdvertiserInfo" parameterType="com.emarbox.dto.AdvertiserInfoQuery">
+        SELECT
+        ai.*,
+        pai.agent_name agentName,
+        aai.cash_balance cashBalance,
+        aai.gift_balance giftBalance
+        FROM
+        pig_advertiser_info ai
+        LEFT JOIN pig_advertiser_account_info aai ON ai.id = aai.advertiser_id
+        left join pig_agent_info pai on ai.agent_id = pai.id
+        WHERE 1=1
+        <if test="advertiserName != null and advertiserName!=''">
+            AND ai.id = #{advertiserName}
+        </if>
+        <if test="agentName != null and agentName!=''">
+            AND ai.agent_id = #{agentName}
+        </if>
+        <if test="status != null and status!=''">
+            AND ai.status = #{status}
+        </if>
+        order by ai.id desc
+        LIMIT #{page.offset},#{page.pageSize}
+    </select>
+    <select id="getCountByPage" resultType="java.lang.Integer" parameterType="com.emarbox.dto.AdvertiserInfoQuery">
+        SELECT
+            count(1) count
+        FROM
+        pig_advertiser_info ai
+        LEFT JOIN pig_advertiser_account_info aai ON ai.id = aai.advertiser_id
+        left join pig_agent_info pai on ai.agent_id = pai.id
+        WHERE 1=1
+        <if test="advertiserName != null and advertiserName!=''">
+            AND ai.id = #{advertiserName}
+        </if>
+        <if test="agentName != null and agentName!=''">
+            AND ai.agent_id = #{agentName}
+        </if>
+        <if test="status != null and status!=''">
+            AND ai.status = #{status}
+        </if>
+    </select>
+
+    <select id="getAdvertiserInfoList" resultType="com.emarbox.entity.AdvertiserInfo" parameterType="com.emarbox.entity.AdvertiserInfo">
+        SELECT
+            pai.*,
+            paai.gift_balance giftBalance,
+            paai.cash_balance cashBalance,
+            pagenti.agent_name agentName
+        FROM
+            pig_advertiser_info pai
+        LEFT JOIN pig_advertiser_account_info paai ON pai.id = paai.advertiser_id
+        LEFT JOIN pig_agent_info pagenti ON pai.agent_id = pagenti.id
+        WHERE
+            1 = 1
+        AND pai.id = #{id}
+    </select>
+
+</mapper>

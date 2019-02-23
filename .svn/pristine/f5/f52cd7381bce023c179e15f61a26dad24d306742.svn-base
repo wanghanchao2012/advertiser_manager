@@ -1,0 +1,95 @@
+package com.emarbox.service;
+
+import com.emarbox.dao.DaoProvider;
+import com.emarbox.dto.AdvertiserInfoQuery;
+import com.emarbox.dto.AdvertiserOptionItemVo;
+import com.emarbox.dto.common.ResponseResult;
+import com.emarbox.entity.AdvertiserInfo;
+import com.emarbox.entity.ProjectCertificate;
+import com.rainerhahnekamp.sneakythrow.Sneaky;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.DigestUtils;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+@Service
+public class AdvertiserInfoService {
+
+    @Autowired
+    DaoProvider daoProvider;
+
+    public ResponseResult<List<AdvertiserInfo>> getPage(AdvertiserInfoQuery query) {
+        ResponseResult.ResponseResultBuilder<List<AdvertiserInfo>> builder = ResponseResult.builder();
+        List<AdvertiserInfo> listByPage = Collections.emptyList();
+        Integer pageSize = daoProvider.getAdvertiserInfoDao().getCountByPage(query);
+        if (pageSize.intValue() > 0) {
+            query.getPage().setRecordCount(pageSize);
+            listByPage = this.daoProvider.getAdvertiserInfoDao().getListByPage(query);
+        }
+        builder.data(listByPage).page(query.getPage());
+        return builder.build().forOk();
+    }
+
+    public List<AdvertiserOptionItemVo> getAdvertiserOptions() {
+        List<AdvertiserInfo> advertiserAll = daoProvider.getAdvertiserInfoDao().getAdvertiserAll();
+        if (CollectionUtils.isNotEmpty(advertiserAll)) {
+           return advertiserAll.stream().map(e -> AdvertiserOptionItemVo.builder().licenseCode(e.getCreditCode()).value(e.getId()).text(e.getAdvertiserName()).build()).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    public AdvertiserInfo getAdvertiserInfo(Long advertiserId) {
+        return daoProvider.getAdvertiserInfoDao().getAdvertiserInfo(advertiserId);
+    }
+
+    @Transactional
+    public boolean edit(AdvertiserInfo record) {
+        record.setUpdateTime(new Date());
+        record.setUpdateUser(Objects.nonNull(record.getCurrentUserId()) ? record.getCurrentUserId().toString() : null);
+        daoProvider.getAdvertiserInfoDao().edit(record);
+        saveCertficate(false, record);
+        return true;
+    }
+
+    @Transactional
+    public boolean add(AdvertiserInfo record) {
+        record.setCreateTime(new Date());
+        record.setCreateUser(Objects.nonNull(record.getCurrentUserId()) ? record.getCurrentUserId().toString() : null);
+        daoProvider.getAdvertiserInfoDao().add(record);
+        saveCertficate(true, record);
+        return true;
+    }
+
+    public void saveCertficate(boolean isAdd, AdvertiserInfo record) {
+        daoProvider.getProjectCertificateDao().delete(ProjectCertificate.builder().advertiserId(record.getId()).build());
+        List<ProjectCertificate> certificateList = record.getCertificateSource().stream().filter(source -> Objects.nonNull(source.getImgPath())).map(source -> {
+            ProjectCertificate certificate = new ProjectCertificate();
+            File imageFile = new File(certificate.getFilePath());
+            String imageSignature = Sneaky.sneaked(() -> DigestUtils.md5DigestAsHex(Sneaky.sneaked(() -> new FileInputStream(imageFile)).get())).get();
+            certificate.setSignature(imageSignature);
+            BufferedImage image = Sneaky.sneaked(() -> ImageIO.read(Sneaky.sneaked(() -> new FileInputStream(imageFile)).get())).get();
+            certificate.setFileWidth(Long.parseLong(String.valueOf(image.getWidth())));
+            certificate.setFileHeight(Long.parseLong(String.valueOf(image.getHeight())));
+            certificate.setFilePath(source.getImgPath());
+            certificate.setFileSize(new File(source.getImgPath().substring(source.getImgPath().lastIndexOf("/") + 1, source.getImgPath().length())).length() / 1024.0);
+            certificate.setAdvertiserId(record.getId());
+            certificate.setCreateUser(String.valueOf(record.getCurrentUserId()));
+            certificate.setCreateTime(new Date());
+            return certificate;
+        }).collect(Collectors.toList());
+        daoProvider.getProjectCertificateDao().insertBatch(certificateList);
+    }
+
+
+}

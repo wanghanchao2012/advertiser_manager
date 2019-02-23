@@ -1,0 +1,39 @@
+package com.emarbox.service;
+
+import com.emarbox.dao.DaoProvider;
+import com.emarbox.dto.common.ResponseResult;
+import com.emarbox.entity.ProjectInfo;
+import com.emarbox.enums.ErrorInfos;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ProjectInfoValidatorService {
+
+    @Autowired
+    DaoProvider daoProvider;
+    public void advertiserBindingValidator(ProjectInfo record, ResponseResult<String> result) {
+        result.forOk();
+        if (record.getPlatformId().equals(2)) {
+            boolean existGdtAdvertiser = daoProvider.getBiddingPlatformAdvertiserDao().isExistGdtAdvertiser(record.getSocialUserId());
+            if (existGdtAdvertiser) {
+                boolean existGdtBuildProject = daoProvider.getBiddingPlatformAdvertiserDao().existGdtBuildProject(record.getSocialUserId());
+                if (existGdtBuildProject) {
+                    result.forFail(ErrorInfos.EXIST_BUILD_ADVETISER_RELATION);
+                }
+            } else {
+                result.forFail(ErrorInfos.GDT_NOT_ADVERTISEER);
+            }
+        } else if (record.getPlatformId().equals(3)) {
+            boolean existToutiaoAdvertiser = daoProvider.getBiddingPlatformAdvertiserDao().isExistToutiaoAdvertiser(record.getSocialUserId());
+            if (existToutiaoAdvertiser) {
+                boolean existTouTiaoBuildProject = daoProvider.getBiddingPlatformAdvertiserDao().existTouTiaoBuildProject(record.getSocialUserId());
+                if (existTouTiaoBuildProject) {
+                    result.forFail(ErrorInfos.EXIST_BUILD_ADVETISER_RELATION);
+                }
+            } else {
+                result.forFail(ErrorInfos.TOU_TIAO_NOT_ADVERTISEER);
+            }
+        }
+    }
+}

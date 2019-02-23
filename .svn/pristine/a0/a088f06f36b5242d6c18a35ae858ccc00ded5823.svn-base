@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>静态页</title>
+<style>
+* {
+	padding: 0;
+	margin: 0;
+}
+
+body, html {
+	width: 100%;
+	height: 100%;
+}
+
+ul, li {
+	list-style: none;
+}
+
+a {
+	text-decoration: none;
+	outline: none;
+	color: #222;
+}
+
+.container {
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	padding-bottom: .2rem;
+}
+
+.ad {
+	position: relative;
+}
+
+.ad::before {
+	top: .1rem;;
+	font-size: 13px;
+	content: "广告";
+	position: absolute;
+	right: .2rem;;
+	border: 1px solid rgba(221, 221, 221, 0.6);
+	border-radius: 3px;
+	color: rgba(221, 221, 221, 0.6)
+}
+
+.item {
+	box-sizing: border-box;
+	width: 100%;
+	padding: .2rem .2rem 0 .2rem;
+}
+
+.item>a {
+	display: block;
+	width: 100%;
+	border-bottom: 1px solid rgba(221, 221, 221, 0.6)
+}
+
+.item>a>p {
+	font-size: 20px;
+	color: #222;
+	margin-bottom: 10px;
+}
+
+.img-container {
+	text-align: center;
+}
+
+.img-container img {
+	/* float: left; */
+	display: inline-block;
+	width: 30%;
+	height: 1.4rem;
+	margin-right: 2.5%;
+}
+
+.img-container-ad img {
+	width: 100%;
+}
+
+/* .left {
+            display: inline-block;
+            width: 40%;
+            height: 100%;
+            background: pink;
+            float: left;
+            margin-right: .2rem;
+        }
+
+        .left img {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .right {
+            width: 55%;
+            font-size: 20px;
+            display: inline-block;
+            height: 100%;
+            background: gray;
+        }
+
+        .right>h3 {
+            width: 100%;
+            height: 30%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .right>p {
+            width: 100%;
+            height: 30%;
+            overflow: hidden;
+        } */
+</style>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+	integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+	crossorigin="anonymous"></script>
+<script>
+        (function () {
+            var updateBaseFontSize = function () {
+                var dWidth = document.documentElement.clientWidth;
+                var baseFontSize = dWidth * 100 / 750;
+                $('html').css('font-size', baseFontSize + 'px');
+            };
+
+            window.addEventListener('resize', updateBaseFontSize);
+            updateBaseFontSize();
+        })();
+    </script>
+</head>
+
+<body>
+	<ul class="container">
+		<!-- <li class="item">
+            <a>
+                <p>
+                    啊哈哈哈哈哈哈哈哈哈啊哈哈哈哈哈哈哈哈哈
+                </p>
+                <div class="img-container">
+                    <img src="http://fms.ipinyou.com/5/1F/F1/C4/F001461SBNVn001DLdlr.jpg" alt="">
+                    <img src="http://fms.ipinyou.com/5/1F/F1/C4/F001461SBNVn001DLdlr.jpg" alt="">
+                    <img src="http://fms.ipinyou.com/5/1F/F1/C4/F001461SBNVn001DLdlr.jpg" alt="">
+                </div>
+            </a>
+
+        </li> -->
+
+		<!-- <li class="item">
+            <div class="left">
+                <img src="" alt="">
+            </div>
+            <div class="right">
+                <h3>
+                    啊哈哈哈哈哈哈哈哈哈啊哈哈哈哈哈哈哈哈哈
+                </h3>
+                <p>啊哈哈</p>
+                <p>啊哈哈</p>
+            </div>
+        </li> -->
+		<!-- <li class="item">
+            <a href={url}>
+                <p>
+                    {title}
+                </p>
+                <div class="img-container-ad">
+                    <img src={src} alt="">
+                </div>
+            </a>
+
+        </li> -->
+	</ul>
+	<script>
+        $(function () {
+            var url = "http://api.yixintui.com/nonstandard/toutiao";
+
+            var search = window.location.search;
+            var affiliate_ID = getUrlParam("a");
+            var projuct_ID = getUrlParam("p");
+            var traffic_source = getUrlParam("source");
+            if(!traffic_source){
+                alert("查询参数不正确！");
+                return;
+            }
+            function getUrlParam(name) {
+                var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+                var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+                if (r != null) return unescape(r[2]); return null; //返回参数值
+            }
+            var data = {
+                affiliate_ID:affiliate_ID,
+                projuct_ID:projuct_ID,
+                traffic_source: traffic_source,
+                news_number: "6"
+            }
+            $.ajax({
+                type: "POST",
+                url: url,
+                contentType: "application/json",  //发送信息至服务器时内容编码类型。             
+                dataType: "json",  // 预期服务器返回的数据类型。如果不指定，jQuery 将自动根据 HTTP 包 MIME 信息来智能判断，比如XML MIME类型就被识别为XML。
+                data: JSON.stringify(data),
+                success: insertStr
+            });
+            function insertStr(result) {
+                var code = result.code;
+                var data = result.data;
+                var message = result.message;
+                var page = result.page;
+
+
+                if (code == 0) {
+                    var ad_data = data.ad_data;
+                    var total = data.toutiao_data;
+                    // var total = [];
+                    // for (var key in toutiao_data) {
+                    //     total.push(result[key]);
+                    // }
+                    var before = total.slice(0, 2);
+                    var after = total.slice(2, total.length);
+                    var beforStr = "";
+                    before.forEach(function (item) {
+                        item = JSON.parse(item);
+                        beforStr += "<li class='item'><a href='" + item.content_url + "'><p>" + item.title + "</p><div class='img-container'>";
+                        item.img_list.forEach(img => {
+                            beforStr += "<img src=" + img.url + ">";
+                        })
+                        beforStr += "</div></a></li>";
+                    })
+
+
+                    var center = ad_data;
+                    var centerStr = "";
+                    center.forEach(function (item) {
+                        centerStr += "<li class='item ad'><a href='" + item.click_url + "'><p>" + item.describe + "</p><div class='img-container-ad'><img src=" + item.img_url + "></div></a></li>";
+                    })
+
+                    var after = total.slice(2, total.length);
+                    var afterStr = "";
+                    after.forEach(function (item) {
+                        item = JSON.parse(item);
+                        afterStr += "<li class='item'><a href='" + item.content_url + "'><p>" + item.title + "</p><div class='img-container'>";
+                        item.img_list.forEach(img => {
+                            afterStr += "<img src=" + img.url + ">";
+                        })
+                        afterStr += "</div></a></li>";
+                    })
+                    $(".container").append(afterStr);
+                    $(".container").prepend(centerStr);
+                    $(".container").prepend(beforStr);
+                } else {
+                    alert(message);
+                }
+                // var src = 'http://fms.ipinyou.com/5/1F/F1/C4/F001461SBNVn001DLdlr.jpg'
+
+
+            }
+
+        })
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,77 @@
+package com.emarbox.entity;
+
+import com.emarbox.enums.StatusType;
+import lombok.Data;
+import lombok.ToString;
+
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import java.util.Date;
+
+@Table(name = "pig_project_info")
+@Data
+@ToString
+public class ProjectInfo {
+
+    private Long id;
+
+    private String projectName;
+
+    private Long advertiserId;
+
+    //归属销售
+    private Long salesmanId;
+
+    //归属运营
+    private Long departmentId;
+
+    //营业执照号
+    private String licenseCode;
+
+    //投放平台
+    private Integer platformId;
+
+    //所属行业
+    private Long categoryType;
+    //所属行业二级
+    private Long subCategoryType;
+    /**
+     * 待审核：pending，审核通过：normal，拒绝：reject
+     */
+    private String status;
+    private Date createTime;
+
+    private Date updateTime;
+
+    private String createUser;
+
+    private String updateUser;
+
+    public String getStatusText() {
+        return StatusType.valueOf(status).getDesc();
+    }
+
+    @Transient
+    private String salesmanName;
+    @Transient
+    private String departmentName;
+    @Transient
+    private String platformName;
+    @Transient
+    private String statusText;
+    @Transient
+    private String advertiserName;
+    @Transient
+    private Long socialUserId;
+    @Transient
+    //现金余额
+    private Double cashBalance;
+    @Transient
+    //虚拟余额
+    private Double giftBalance;
+    @Transient
+    private Long currentUserId;
+    @Transient
+    private Long projectIdV1;
+
+}

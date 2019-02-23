@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.emarbox.mapper.auth.AgentInfoMapper">
+    <select id="getListByPage" resultType="com.emarbox.entity.AgentInfo" parameterType="com.emarbox.dto.AgentInfoQuery">
+        SELECT
+        ai.*, aai.cash_balance,
+        aai.gift_balance
+        FROM
+        pig_agent_info ai
+        LEFT JOIN pig_agent_account_info aai ON ai.id = aai.agent_id
+        WHERE 1=1
+        <if test="agentName != null and agentName!=''">
+            AND (ai.id = #{agentName} or ai.agent_name LIKE CONCAT('%',#{agentName},'%'))
+        </if>
+        <if test="corporation != null and corporation!=''">
+            AND ai.corporation = #{corporation}
+        </if>
+        <if test="status != null and status!=''">
+            AND ai.status = #{status}
+        </if>
+        LIMIT #{page.offset},#{page.pageSize}
+    </select>
+    <select id="getCountByPage" resultType="java.lang.Integer" parameterType="com.emarbox.dto.AgentInfoQuery">
+        SELECT
+            count(1) count
+        FROM
+        pig_agent_info ai
+        LEFT JOIN pig_agent_account_info aai ON ai.id = aai.agent_id
+        WHERE 1=1
+        <if test="agentName != null and agentName!=''">
+            AND (ai.id = #{agentName} or ai.agent_name LIKE CONCAT('%',#{agentName},'%'))
+        </if>
+        <if test="corporation != null and corporation!=''">
+            AND ai.corporation = #{corporation}
+        </if>
+        <if test="status != null and status!=''">
+            AND ai.status = #{status}
+        </if>
+    </select>
+</mapper>

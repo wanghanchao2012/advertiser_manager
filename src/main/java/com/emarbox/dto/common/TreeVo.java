@@ -1,0 +1,21 @@
+package com.emarbox.dto.common;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Builder
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class TreeVo {
+    private Long parentId;
+    private String label;
+    private Long value;
+    private List<TreeVo> children;
+}

@@ -1,0 +1,46 @@
+package com.emarbox.dao;
+
+import com.emarbox.dto.AgentInfoQuery;
+import com.emarbox.entity.AgentInfo;
+import com.emarbox.mapper.MapperAuthProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import tk.mybatis.mapper.entity.Example;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public class AgentInfoDao {
+    @Autowired
+    MapperAuthProvider mapperProvider;
+
+    public List<AgentInfo> getListByPage(AgentInfoQuery query) {
+        return mapperProvider.getAgentInfoMapper().getListByPage(query);
+    }
+
+    public Integer getCountByPage(AgentInfoQuery query) {
+        return Optional.ofNullable(mapperProvider.getAgentInfoMapper().getCountByPage(query)).orElse(0);
+    }
+
+    public List<AgentInfo> getAgentInfoAll() {
+       return mapperProvider.getAgentInfoMapper().selectAll();
+    }
+
+    public AgentInfo getAgentInfo(Long agentId){
+        Example example = new Example(AgentInfo.class);
+        example.createCriteria().andEqualTo("id",agentId);
+        return mapperProvider.getAgentInfoMapper().selectOneByExample(example);
+    }
+
+    public boolean edit(AgentInfo record) {
+        Example example = new Example(AgentInfo.class);
+        example.createCriteria().andEqualTo("id",record.getId());
+        return mapperProvider.getAgentInfoMapper().updateByExample(record,example) > 0;
+    }
+
+
+    public boolean add(AgentInfo record) {
+        return mapperProvider.getAgentInfoMapper().insert(record) > 0;
+    }
+}

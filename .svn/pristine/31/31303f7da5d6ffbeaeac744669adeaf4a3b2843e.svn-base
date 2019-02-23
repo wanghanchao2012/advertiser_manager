@@ -1,0 +1,62 @@
+package com.emarbox.service.validator;
+
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import com.emarbox.dto.common.ResponseResult;
+import com.emarbox.dto.common.tuple.Tuple3;
+import com.emarbox.enums.ValidType;
+
+
+public class ValidationBaseService {
+
+
+    public Tuple3<Boolean, String, ValidType> getTuple3(Boolean isOk, String msg, ValidType vtype) {
+        return Tuple3.<Boolean, String, ValidType> builder().v1(isOk).v2(msg).v3(vtype).build();
+    }
+
+    public Tuple3<Boolean, String, ValidType> getTuple3(Boolean isOk, String msg) {
+        return Tuple3.<Boolean, String, ValidType> builder().v1(isOk).v2(msg).v3(ValidType.ALL).build();
+    }
+
+
+    public void getResponseResult(ValidType validType, List<Tuple3<Boolean, String, ValidType>> errorMsgList, ResponseResult<Map<String, Object>> stringResponseResult) {
+        errorMsgList = errorMsgList.stream().filter(validItem -> validItem.getV3().equals(validType) || validItem.getV3().equals(ValidType.ALL)).collect(Collectors.toList());
+        for (Tuple3<Boolean, String, ValidType> record : errorMsgList) {
+            if (record.getV1().equals(Boolean.FALSE)) {
+                stringResponseResult.forFail(-1, record.getV2());
+                break;
+            }
+        }
+        stringResponseResult.forOk();
+    }
+
+    protected boolean isMobile(String str) {
+        Pattern p = null;
+        Matcher m = null;
+        boolean b = false;
+        p = Pattern.compile("^[1][3,4,5,7,8][0-9]{9}$");
+        m = p.matcher(str);
+        b = m.matches();
+        return b;
+    }
+
+    protected boolean isPhone(String str) {
+        Pattern p1 = null, p2 = null;
+        Matcher m = null;
+        boolean b = false;
+        p1 = Pattern.compile("^[0][1-9]{2,3}-[0-9]{5,10}$");
+        if (str.length() > 9) {
+            m = p1.matcher(str);
+            b = m.matches();
+        } else {
+            m = p2.matcher(str);
+            b = m.matches();
+        }
+        return b;
+    }
+
+}

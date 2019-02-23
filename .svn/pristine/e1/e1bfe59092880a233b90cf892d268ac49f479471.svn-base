@@ -1,0 +1,13 @@
+package com.emarbox.dto;
+
+import lombok.Builder;
+import lombok.Data;
+
+@Builder
+@Data
+public class AdvertiserOptionItemVo {
+    private Object text;
+    private Object value;
+    private String licenseCode;
+
+}

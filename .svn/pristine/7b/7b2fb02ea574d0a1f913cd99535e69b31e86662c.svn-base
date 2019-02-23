@@ -1,0 +1,39 @@
+package com.emarbox.mapper;
+
+import com.emarbox.mapper.auth.*;
+import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+@Data
+@Repository
+public class MapperAuthProvider {
+    @Autowired
+    AdvertiserInfoMapper advertiserInfoMapper;
+    @Autowired
+    AgentInfoMapper agentInfoMapper;
+    @Autowired
+    ProjectInfoMapper projectInfoMapper;
+    @Autowired
+    PlatformIndustryInfoMapper platformIndustryInfoMapper;
+    @Autowired
+    EmarboxProjectCategoryMapper emarboxProjectCategoryMapper;
+    @Autowired
+    ProjectCertificateMapper projectCertificateMapper;
+
+    @Autowired
+    ProjectVersionMapInfoMapper projectVersionMapInfoMapper;
+
+    /**
+     * compatibility with historical versions
+     */
+    @Autowired
+    EmarboxProjectMapper emarboxProjectMapper;
+    @Autowired
+    EmarboxUserMapper emarboxUserMapper;
+    @Autowired
+    EmarboxUserProjectMapper emarboxUserProjectMapper;
+    @Autowired
+    EmarboxProjectModuleMapper emarboxProjectModuleMapper;
+
+}

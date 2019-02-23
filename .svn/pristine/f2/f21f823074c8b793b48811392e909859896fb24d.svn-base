@@ -1,0 +1,66 @@
+package com.emarbox.service.validator;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.emarbox.dao.DaoProvider;
+import com.emarbox.dto.common.ResponseResult;
+import com.emarbox.dto.common.tuple.Tuple3;
+import com.emarbox.entity.EmarboxProject;
+import com.emarbox.enums.ErrorInfos;
+import com.emarbox.enums.ValidType;
+
+@Service
+public class ProjectInfoValidatorService extends ValidationBaseService {
+
+    @Autowired
+    DaoProvider daoProvider;
+
+    public void advertiserBindingValidator(EmarboxProject record, ResponseResult<Map<String, Object>> result) {
+        result.forOk();
+        if (record.getPlatformId().equals(2)) {
+            boolean existGdtAdvertiser = daoProvider.getBiddingPlatformAdvertiserDao().isExistGdtAdvertiser(record.getSocialUserId());
+            if (existGdtAdvertiser) {
+                boolean existGdtBuildProject = daoProvider.getBiddingPlatformAdvertiserDao().existGdtBuildProject(record.getSocialUserId());
+                if (existGdtBuildProject) {
+                    result.forFail(ErrorInfos.EXIST_BUILD_ADVETISER_RELATION);
+                }
+            } else {
+                result.forFail(ErrorInfos.GDT_NOT_ADVERTISEER);
+            }
+        } else if (record.getPlatformId().equals(3)) {
+            boolean existToutiaoAdvertiser = daoProvider.getBiddingPlatformAdvertiserDao().isExistToutiaoAdvertiser(record.getSocialUserId());
+            if (existToutiaoAdvertiser) {
+                boolean existTouTiaoBuildProject = daoProvider.getBiddingPlatformAdvertiserDao().existTouTiaoBuildProject(record.getSocialUserId());
+                if (existTouTiaoBuildProject) {
+                    result.forFail(ErrorInfos.EXIST_BUILD_ADVETISER_RELATION);
+                }
+            } else {
+                result.forFail(ErrorInfos.TOU_TIAO_NOT_ADVERTISEER);
+            }
+        }
+    }
+
+    public ResponseResult<Map<String, Object>> fromValidator(ValidType validType, EmarboxProject emarboxProject) {
+
+        List<Tuple3<Boolean, String, ValidType>> errorMsgList = new ArrayList<>();
+        errorMsgList.add(getTuple3(Objects.nonNull(emarboxProject.getProjectName()), "绑定ID不能为空"));
+        errorMsgList.add(getTuple3(Objects.nonNull(emarboxProject.getAdvertiserId()), "广告主名称不能为空"));
+        errorMsgList.add(getTuple3(Objects.nonNull(emarboxProject.getPlatformId()), "投放平台不能为空"));
+        errorMsgList.add(getTuple3(Objects.nonNull(emarboxProject.getCategoryType()), "行业类别不能为空"));
+        errorMsgList.add(getTuple3(Objects.nonNull(emarboxProject.getSalesmanId()), "归属销售不能为空"));
+        errorMsgList.add(getTuple3(Objects.nonNull(emarboxProject.getDepartmentId()), "运营部门不能为空"));
+
+        errorMsgList.add(getTuple3(Objects.nonNull(emarboxProject.getProjectName()) && emarboxProject.getProjectName().length() < 200, "项目名称不能超过200个字符"));
+
+        ResponseResult<Map<String, Object>> stringResponseResult = new ResponseResult<>();
+        getResponseResult(validType, errorMsgList, stringResponseResult);
+        return stringResponseResult;
+    }
+
+}

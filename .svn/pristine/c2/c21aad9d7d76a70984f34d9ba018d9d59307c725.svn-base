@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.emarbox.mapper.secondary.AdvertiserInfoMapper">
+    <select id="getListByPage" resultType="com.emarbox.entity.AdvertiserInfo" parameterType="com.emarbox.dto.AdvertiserInfoQuery">
+        SELECT
+        ai.*, aai.cash_balance,
+        aai.gift_balance
+        FROM
+        pig_advertiser_info ai
+        LEFT JOIN pig_advertiser_account_info aai ON ai.id = aai.advertiser_id
+        left join pig_agent_info pai on ai.agent_id = pai.id
+        WHERE 1=1
+        <if test="advertiserName != null">
+            AND (aai.advertiser_id = #{advertiserName} or pai.advertiser_name LIKE CONCAT('%',#{advertiserName},'%')
+        </if>
+        <if test="agentName != null">
+            AND (ai.agent_id = #{agentName} or pai.agent_name LIKE CONCAT('%',#{agentName},'%')
+        </if>
+        <if test="status != null">
+            AND ai.status = #{status}
+        </if>
+        LIMIT #{page.offset},#{page.pageSize}
+    </select>
+    <select id="getCountByPage" resultType="java.lang.Integer" parameterType="com.emarbox.dto.AdvertiserInfoQuery">
+        SELECT
+            count(1) count
+        FROM
+        pig_advertiser_info ai
+        LEFT JOIN pig_advertiser_account_info aai ON ai.id = aai.advertiser_id
+        left join pig_agent_info pai on ai.agent_id = pai.id
+        WHERE 1=1
+        <if test="advertiserName != null">
+            AND (aai.advertiser_id = #{advertiserName} or pai.advertiser_name LIKE CONCAT('%',#{advertiserName},'%')
+        </if>
+        <if test="agentName != null">
+            AND (ai.agent_id = #{agentName} or pai.agent_name LIKE CONCAT('%',#{agentName},'%')
+        </if>
+        <if test="status != null">
+            AND ai.status = #{status}
+        </if>
+    </select>
+
+
+
+</mapper>

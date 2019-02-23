@@ -1,0 +1,44 @@
+#server port
+server.port=6288
+
+##redis-configuration
+#redis.ip.rtb.a=123.59.17.173
+#redis.port.rtb.a=7763
+#
+#redis.ip.rtb.b=123.59.17.173
+#redis.port.rtb.b=7763
+#
+#jedis.pool.config.maxTotal=1000
+#jedis.pool.config.maxIdle=5
+#jedis.pool.config.maxWaitMillis=5
+#redis.pool.config.connect_time_out=50000
+##redis.pass.a=campSync
+##redis.pass.b=campSync
+#redis.pass.a=
+#redis.pass.b=
+
+# \u4e3b\u6570\u636e\u6e90\uff0c\u9ed8\u8ba4\u7684
+spring.datasource.dsp.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.dsp.jdbc-url=jdbc:mysql://221.122.127.181:3306/dspprd?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true
+spring.datasource.dsp.username=dsp
+spring.datasource.dsp.password=DSPprdDSP
+
+
+# \u66f4\u591a\u6570\u636e\u6e90
+spring.datasource.auth.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.auth.jdbc-url=jdbc:mysql://221.122.127.181:3306/emarbox3_prd?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&failOverReadOnly=false
+spring.datasource.auth.username=dsp
+spring.datasource.auth.password=DSPprdDSP
+
+
+logging.level.com.emarbox.mapper=DEBUG
+
+#spring data redis config
+spring.redis.database=0
+spring.redis.host=123.59.17.112
+spring.redis.port=7763
+spring.redis.max-active=8
+spring.redis.max-wait=-1
+spring.redis.max-idle=8
+spring.redis.min-idle=0
+spring.redis.timeout=5000

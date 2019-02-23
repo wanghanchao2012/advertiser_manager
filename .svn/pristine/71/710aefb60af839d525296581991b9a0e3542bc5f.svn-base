@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.emarbox.mapper.auth.ProjectInfoMapper">
+    <select id="getListByPage" resultType="com.emarbox.entity.ProjectInfo" parameterType="com.emarbox.dto.ProjectInfoQuery">
+        SELECT
+        ai.*, ppai.cash_balance,
+        ppai.gift_balance
+        FROM
+        pig_project_info ai
+        left join pig_advertiser_info pai on pai.id = ai.advertiser_id
+        left join pig_agent_info agent_info on agent_info.id = pai.agent_id
+        left join pig_project_account_info ppai on ppai.project_id = ai.id
+        WHERE 1=1
+        <if test="projectName != null">
+            AND (ai.id = #{projectName} or ai.project_name LIKE CONCAT('%',#{projectName},'%')
+        </if>
+        <if test="advertiserName != null">
+            AND (pai.advertiser_name = #{advertiserName} or pai.advertiser_name LIKE CONCAT('%',#{advertiserName},'%')
+        </if>
+        <if test="agentName != null">
+            AND (agent_info.agent_id = #{agentName} or agent_info.agent_name LIKE CONCAT('%',#{agentName},'%')
+        </if>
+        <if test="salesmanId != null">
+            AND ai.salesman_id = #{salesmanId}
+        </if>
+        <if test="departmentId != null">
+            AND ai.department_id = #{departmentId}
+        </if>
+
+        LIMIT #{page.offset},#{page.pageSize}
+    </select>
+    <select id="getCountByPage" resultType="java.lang.Integer" parameterType="com.emarbox.dto.AgentInfoQuery">
+        SELECT
+            count(1) count
+        FROM
+        pig_project_info ai
+        left join pig_advertiser_info pai on pai.id = ai.advertiser_id
+        left join pig_agent_info agent_info on agent_info.id = pai.agent_id
+        left join pig_project_account_info ppai on ppai.project_id = ai.id
+        WHERE 1=1
+        <if test="projectName != null">
+            AND (ai.id = #{projectName} or ai.project_name LIKE CONCAT('%',#{projectName},'%')
+        </if>
+        <if test="advertiserName != null">
+            AND (pai.advertiser_name = #{advertiserName} or pai.advertiser_name LIKE CONCAT('%',#{advertiserName},'%')
+        </if>
+        <if test="agentName != null">
+            AND (agent_info.agent_id = #{agentName} or agent_info.agent_name LIKE CONCAT('%',#{agentName},'%')
+        </if>
+        <if test="salesmanId != null">
+            AND ai.salesman_id = #{salesmanId}
+        </if>
+        <if test="departmentId != null">
+            AND ai.department_id = #{departmentId}
+        </if>
+    </select>
+
+    <select id="getProjectInfo" resultType="com.emarbox.entity.ProjectInfo" parameterType="com.emarbox.entity.ProjectInfo">
+        SELECT
+            ppi.*,
+            pai.advertiser_name,
+            ps.social_user_id
+        FROM
+            pig_project_info ppi
+        LEFT JOIN project_set ps ON ppi.id = ps.project_id
+        LEFT JOIN pig_advertiser_info pai ON ppi.advertiser_id = pai.advertiser_id
+        where ppi.id = #{id}
+    </select>
+</mapper>

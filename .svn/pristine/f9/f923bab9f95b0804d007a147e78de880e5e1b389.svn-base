@@ -1,0 +1,50 @@
+spring.profiles.active=dev
+
+server.max-http-header-size=8192
+
+#\u6700\u5c0f\u8fde\u63a5\u6570\u91cf
+spring.datasource.dsp.minIdle=2
+spring.datasource.dsp.maxActive=5
+spring.datasource.dsp.maxWait=60000
+spring.datasource.dsp.timeBetweenEvictionRunsMillis=60000
+spring.datasource.dsp.minEvictableIdleTimeMillis=300000
+spring.datasource.dsp.validationQuery=SELECT 'x' FROM DUAL
+spring.datasource.dsp.testWhileIdle=true
+spring.datasource.dsp.testOnBorrow=false
+spring.datasource.dsp.testOnReturn=false
+spring.datasource.dsp.poolPreparedStatements=true
+spring.datasource.dsp.maxPoolPreparedStatementPerConnectionSize=20
+spring.datasource.dsp.filters=stat
+
+# \u521d\u59cb\u5316\u5927\u5c0f\uff0c\u6700\u5c0f\uff0c\u6700\u5927
+spring.datasource.auth.minIdle=2
+spring.datasource.auth.maxActive=5
+spring.datasource.auth.maxWait=60000
+spring.datasource.auth.timeBetweenEvictionRunsMillis=60000
+spring.datasource.auth.minEvictableIdleTimeMillis=300000
+spring.datasource.auth.validationQuery=SELECT 'x' FROM DUAL
+spring.datasource.auth.testWhileIdle=true
+spring.datasource.auth.testOnBorrow=false
+spring.datasource.auth.testOnReturn=false
+spring.datasource.auth.poolPreparedStatements=true
+spring.datasource.auth.maxPoolPreparedStatementPerConnectionSize=20
+spring.datasource.auth.filters=stat
+
+#mybatis config
+mybatis.typeAliasesPackage=com.emarbox.entity
+
+multipart.maxFileSize=100Mb
+multipart.maxRequestSize=500Mb
+
+account.advertiser.image.upload.url=/data/dsp/creative/account_cert_img/
+account.advertiser.image.upload.preview_domain=http://img.emarbox.com/dsp/account_cert_img/
+
+nonstandard.list.preview=http://img.emarbox.com/dsp/feeds/feeds_545129557897.png
+nonstandard.tracking.base=http://feeds.yixintui.com/nonstandard/index?
+nonstandard.tracking.clickUrl=http://m.emarbox.com/dsp/click?
+nonstandard.tracking.etc=etc_n=dsp&etc_s=emar&etc_m={media}&etc_c={campaign_id}&etc_t={creative_id}&etc_p={domain}&etc_x={supplier}&etc_clk={clkid}
+nonstandard.tracking.impUrl=http://m.emarbox.com/dsp/impression?
+nonstandard.tracking.impKey=impr_click_key_23ser@df&
+
+spring.cache.type=ehcache
+spring.cache.ehcache.config=classpath:ehcache.xml

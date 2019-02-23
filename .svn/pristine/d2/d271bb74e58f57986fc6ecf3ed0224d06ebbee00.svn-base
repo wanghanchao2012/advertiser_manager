@@ -1,0 +1,117 @@
+package com.emarbox.service;
+
+import com.emarbox.dao.DaoProvider;
+import com.emarbox.dto.ProjectInfoQuery;
+import com.emarbox.dto.common.OptionItemVo;
+import com.emarbox.dto.common.ResponseResult;
+import com.emarbox.entity.EmarboxProject;
+import com.emarbox.entity.ProjectInfo;
+import com.emarbox.entity.ProjectVersionMapInfo;
+import com.emarbox.entity.compatible.ProjectSet;
+import com.emarbox.enums.ErrorInfos;
+import com.emarbox.service.validator.ProjectInfoValidatorService;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+@Deprecated
+@Service
+public class ProjectInfoService {
+
+    @Autowired
+    DaoProvider daoProvider;
+    @Autowired
+    ProjectInfoValidatorService projectInfoValidatorService;
+
+    public ResponseResult<List<ProjectInfo>> getPage(ProjectInfoQuery query) {
+        ResponseResult.ResponseResultBuilder<List<ProjectInfo>> builder = ResponseResult.builder();
+        Integer pageSize = daoProvider.getProjectInfoDao().getCountByPage(query);
+        if (pageSize.intValue() > 0) {
+            query.getPage().setRecordCount(pageSize);
+            List<ProjectInfo> listByPage = this.daoProvider.getProjectInfoDao().getListByPage(query);
+            builder.data(listByPage).page(query.getPage());
+        }
+        return builder.build().forOk();
+    }
+
+    public ProjectInfo getProjectInfo(Long projectId) {
+        return daoProvider.getProjectInfoDao().getProjectInfo(projectId);
+    }
+
+    public List<OptionItemVo> getProjectOptions() {
+        List<ProjectInfo> projectAll = daoProvider.getProjectInfoDao().getProjectAll();
+        if (CollectionUtils.isNotEmpty(projectAll)) {
+            return projectAll.stream().map(e -> OptionItemVo.builder().value(e.getId()).text(e.getProjectName()).build()).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    @Transactional
+    public ResponseResult<String> edit(ProjectInfo record) {
+        ResponseResult<String> result = new ResponseResult<>();
+        if(Objects.isNull(record.getId())){
+            return result.forFail(ErrorInfos.MISSING_REQUIRED_PARAM);
+        }
+        ProjectVersionMapInfo projectInfoV1 = daoProvider.getProjectVersionMapInfoDao().getProjectVersionMapInfo(record.getId());
+        if(Objects.isNull(projectInfoV1)){
+            return result.forFail(ErrorInfos.MISSING_DATA);
+        }
+        record.setProjectIdV1(projectInfoV1.getV1ProjectId());
+        if (Objects.nonNull(record.getSocialUserId())) {
+            ProjectSet projectSet = daoProvider.getProjectSetDao().getProjectSet(projectInfoV1.getV1ProjectId(), record.getSocialUserId());
+            if (projectSet == null || !projectSet.getProjectId().equals(projectInfoV1.getV1ProjectId())) {
+                // projectInfoValidatorService.advertiserBindingValidator(record, result);
+                if (!result.getCode().equals(0)) {
+                    return result;
+                }
+                if (record.getPlatformId().equals(2)) {
+                    daoProvider.getBiddingPlatformAdvertiserDao().buildGdtProject(projectInfoV1.getV1ProjectId(), record.getSocialUserId());
+                } else if (record.getPlatformId().equals(3)) {
+                    daoProvider.getBiddingPlatformAdvertiserDao().buildToutiaoProject(projectInfoV1.getV1ProjectId(), record.getSocialUserId());
+                }
+            }
+        }
+        daoProvider.getProjectInfoDao().edit(record);
+
+        EmarboxProject emarboxProject = compatibleHistoryProject(false, record);
+        return result.forOk();
+    }
+
+    @Transactional
+    public ResponseResult<String> add(ProjectInfo record) {
+        ResponseResult<String> result = new ResponseResult<>();
+        if (Objects.nonNull(record.getSocialUserId())) {
+            //  projectInfoValidatorService.advertiserBindingValidator(record, result);
+            if (!result.getCode().equals(0)) {
+                return result;
+            }
+        }
+        daoProvider.getProjectInfoDao().add(record);
+
+        EmarboxProject emarboxProject = compatibleHistoryProject(true, record);
+        if (Objects.nonNull(record.getSocialUserId())) {
+            if (record.getPlatformId().equals(2)) {
+                daoProvider.getBiddingPlatformAdvertiserDao().buildGdtProject(emarboxProject.getId(), record.getSocialUserId());
+            } else if (record.getPlatformId().equals(3)) {
+                daoProvider.getBiddingPlatformAdvertiserDao().buildToutiaoProject(emarboxProject.getId(), record.getSocialUserId());
+            }
+        }
+        return result.forOk();
+    }
+
+    //兼容老版本
+    private EmarboxProject compatibleHistoryProject(boolean isAdd, ProjectInfo record) {
+        if (isAdd) {
+            return daoProvider.getEmarboxProjectDao().generateEmarboxProject(record);
+        } else {
+            return daoProvider.getEmarboxProjectDao().updateEmarboxProject(record);
+        }
+    }
+
+}

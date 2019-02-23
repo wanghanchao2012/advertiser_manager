@@ -1,0 +1,88 @@
+package com.emarbox.entity;
+
+import lombok.Data;
+
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.util.Date;
+
+@Table(name = "emarbox_project")
+@Data
+public class EmarboxProject {
+
+    @Id
+    @Column(name="project_id")
+    //项目ID
+    private Long id;
+
+    //用户ID
+    private Long userId;
+
+    //用户类型: 管理员 admin ,  主帐号 user, 子帐号 sub_user
+    private String userType;
+
+    //项目名称
+    private String projectName;
+
+    //项目网址
+    private String projectUrl;
+
+    //项目备注
+    private String projectMemo;
+
+    //项目联系人
+    private String linkman;
+
+    //联系人电话
+    private String telphone;
+
+    //联系人手机号码
+    private String mobile;
+
+    //联系人邮箱
+    private String email;
+
+    //是否已删除
+    private Long deleted;
+
+    //创建时间
+    private Date createTime;
+
+    //创建者
+    private String createUser;
+
+    //更新时间
+    private Date updateTime;
+
+    //更新者
+    private String updateUser;
+
+    //项目编码
+    private String projectCode;
+
+    //项目分类ID
+    private Long projectCatId;
+
+    //网站类型代码
+    private String siteTypeCode;
+
+    //是否是代理商项目：1 是 0 不是
+    private Long isAgent = 0L;
+
+    //地域编码
+    private String areaCode;
+
+    //品牌名称
+    private String brandName;
+
+    //关联QQ
+    private String relatedQq;
+
+    private String supervisor;
+    private String sales;
+
+    private Integer orgId;
+
+}

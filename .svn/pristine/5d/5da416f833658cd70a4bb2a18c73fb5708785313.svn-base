@@ -1,0 +1,35 @@
+package com.emarbox.service;
+
+import com.emarbox.dao.DaoProvider;
+import com.emarbox.entity.ProjectCertificate;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Objects;
+
+@Service
+public class ProjectCertificateService {
+
+
+    @Autowired
+    DaoProvider daoProvider;
+
+    public boolean insert(ProjectCertificate certificate) {
+        return daoProvider.getProjectCertificateDao().insert(certificate);
+    }
+
+    public String getCertImageUrl(ProjectCertificate certificate) {
+        if (StringUtils.isNoneBlank(certificate.getSignature()) && Objects.nonNull(certificate.getAdvertiserId())) {
+            ProjectCertificate query = new ProjectCertificate();
+            query.setCertificateId(certificate.getCertificateId());
+            query.setSignature(certificate.getSignature());
+            ProjectCertificate projectCertificate = daoProvider.getProjectCertificateDao().getProjectCertificate(query);
+            if (Objects.nonNull(projectCertificate)) {
+                return projectCertificate.getFilePath();
+            }
+        }
+        return null;
+    }
+
+}

@@ -1,0 +1,33 @@
+package com.emarbox.dao;
+
+import java.util.Map;
+import java.util.Objects;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.dozer.Mapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import com.emarbox.mapper.MapperAuthProvider;
+import com.rainerhahnekamp.sneakythrow.Sneaky;
+
+@Repository
+public class BaseDao<T> {
+	@Autowired
+	MapperAuthProvider mapperProvider;
+	@Autowired
+	Mapper dozerBeanMapper;
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public T beanSupply(T oldRecord, T newRecord, Class<T> cls) {
+		Map currentMap = Sneaky.sneaked(() -> BeanUtils.describe(oldRecord)).get();
+		Map newMap = Sneaky.sneaked(() -> BeanUtils.describe(newRecord)).get();
+		for (Object key : newMap.keySet()) {
+			boolean hasLength = Objects.nonNull(newMap.get(key)) && !newMap.get(key).equals("null");
+			if (hasLength) {
+				currentMap.put(key, newMap.get(key));
+			}
+		}
+		return dozerBeanMapper.map(currentMap, cls);
+	}
+}

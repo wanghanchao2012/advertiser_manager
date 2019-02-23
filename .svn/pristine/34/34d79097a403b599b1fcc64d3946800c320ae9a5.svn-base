@@ -1,0 +1,61 @@
+package com.emarbox.dao;
+
+import com.emarbox.dto.AgentInfoQuery;
+import com.emarbox.entity.AgentInfo;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Repository;
+import tk.mybatis.mapper.entity.Example;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+@Repository
+public class AgentInfoDao extends BaseDao<AgentInfo> {
+
+
+    public List<AgentInfo> getListByPage(AgentInfoQuery query) {
+        return mapperProvider.getAgentInfoMapper().getListByPage(query);
+    }
+
+    public Integer getCountByPage(AgentInfoQuery query) {
+        return Optional.ofNullable(mapperProvider.getAgentInfoMapper().getCountByPage(query)).orElse(0);
+    }
+
+    public List<AgentInfo> getAgentInfoAll() {
+       return mapperProvider.getAgentInfoMapper().selectAll();
+    }
+
+    public AgentInfo getAgentInfo(AgentInfo agentInfo) {
+        Example example = new Example(AgentInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (Objects.nonNull(agentInfo.getId())) {
+            criteria.andEqualTo("id", agentInfo.getId());
+        }
+        if (Objects.nonNull(agentInfo.getQualificationSignature())) {
+            criteria.andEqualTo("qualificationSignature", agentInfo.getQualificationSignature());
+        }
+        List<AgentInfo> agentInfos = mapperProvider.getAgentInfoMapper().selectByExample(example);
+        if (CollectionUtils.isNotEmpty(agentInfos)) {
+            return agentInfos.get(0);
+        }
+        return new AgentInfo();
+    }
+
+    public boolean edit(AgentInfo record) {
+        Example example = new Example(AgentInfo.class);
+        example.createCriteria().andEqualTo("id",record.getId());
+        AgentInfo agentInfo = mapperProvider.getAgentInfoMapper().selectOneByExample(example);
+        if (agentInfo != null) {
+            record = beanSupply(agentInfo, record, AgentInfo.class);
+        }
+        return mapperProvider.getAgentInfoMapper().updateByExample(record,example) > 0;
+    }
+
+
+    public boolean add(AgentInfo record) {
+        return mapperProvider.getAgentInfoMapper().insert(record) > 0;
+    }
+
+
+}

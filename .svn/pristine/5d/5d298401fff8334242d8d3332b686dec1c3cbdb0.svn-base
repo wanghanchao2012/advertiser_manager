@@ -1,0 +1,30 @@
+package com.emarbox.dao;
+
+import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+@Data
+@Repository
+public class DaoProvider {
+    @Autowired
+    AdvertiserInfoDao advertiserInfoDao;
+    @Autowired
+    PlatformIndustryInfoDao platformIndustryInfoDao;
+    @Autowired
+    AgentInfoDao agentInfoDao;
+    @Autowired
+    EmarboxProjectCategoryDao emarboxProjectCategoryDao;
+    @Autowired
+    ProjectCertificateDao projectCertificateDao;
+    @Autowired
+    BiddingPlatformAdvertiserDao biddingPlatformAdvertiserDao;
+    @Autowired
+    EmarboxProjectV2Dao emarboxProjectV2Dao;
+    @Autowired
+    ProjectSetDao projectSetDao;
+    @Autowired
+    EmarboxUserDao emarboxUserDao;
+    @Autowired
+    TtAdvertiserDao ttAdvertiserDao;
+}

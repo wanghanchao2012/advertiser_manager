@@ -1,0 +1,26 @@
+package com.emarbox.dao;
+
+import com.emarbox.dto.common.TreeVo;
+import com.emarbox.entity.PlatformIndustryInfo;
+import com.emarbox.mapper.MapperAuthProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import tk.mybatis.mapper.entity.Example;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Repository
+public class PlatformIndustryInfoDao {
+
+    @Autowired
+    MapperAuthProvider mapperProvider;
+
+    public List<PlatformIndustryInfo> getIndustryInfoList(Long platformId){
+        List<TreeVo> optionList = new ArrayList<>();
+        Example example = new Example(PlatformIndustryInfo.class);
+        example.createCriteria().andEqualTo("platformId",platformId);
+        return mapperProvider.getPlatformIndustryInfoMapper().selectByExample(example);
+    }
+
+}

@@ -1,0 +1,57 @@
+package com.emarbox.service;
+
+import com.emarbox.dao.DaoProvider;
+import com.emarbox.dto.AdvertiserInfoQuery;
+import com.emarbox.dto.AdvertiserOptionItemVo;
+import com.emarbox.dto.common.ResponseResult;
+import com.emarbox.entity.AdvertiserInfo;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class AdvertiserInfoService {
+
+    @Autowired
+    DaoProvider daoProvider;
+
+    public ResponseResult<List<AdvertiserInfo>> getPage(AdvertiserInfoQuery query) {
+        ResponseResult.ResponseResultBuilder<List<AdvertiserInfo>> builder = ResponseResult.builder();
+        Integer pageSize = daoProvider.getAdvertiserInfoDao().getCountByPage(query);
+        if (pageSize.intValue() > 0) {
+            query.getPage().setRecordCount(pageSize);
+            List<AdvertiserInfo> listByPage = this.daoProvider.getAdvertiserInfoDao().getListByPage(query);
+            builder.data(listByPage).page(query.getPage());
+        }
+        return builder.build().forOk();
+    }
+
+    public List<AdvertiserOptionItemVo> getAdvertiserOptions() {
+        List<AdvertiserInfo> advertiserAll = daoProvider.getAdvertiserInfoDao().getAdvertiserAll();
+        if (CollectionUtils.isNotEmpty(advertiserAll)) {
+           return advertiserAll.stream().map(e -> AdvertiserOptionItemVo.builder().licenseCode(e.getCreditCode()).value(e.getId()).text(e.getAdvertiserName()).build()).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    public AdvertiserInfo getAdvertiserInfo(Long advertiserId) {
+        return daoProvider.getAdvertiserInfoDao().getAdvertiserInfo(advertiserId);
+    }
+
+    public boolean edit(AdvertiserInfo record) {
+        record.setUpdateTime(new Date());
+        return daoProvider.getAdvertiserInfoDao().edit(record);
+    }
+
+
+    public boolean add(AdvertiserInfo record) {
+        record.setCreateTime(new Date());
+        return daoProvider.getAdvertiserInfoDao().add(record);
+    }
+
+}

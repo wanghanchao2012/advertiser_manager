@@ -1,0 +1,68 @@
+package com.emarbox.service;
+
+import com.emarbox.dao.DaoProvider;
+import com.emarbox.dto.AgentInfoQuery;
+import com.emarbox.dto.common.OptionItemVo;
+import com.emarbox.dto.common.ResponseResult;
+import com.emarbox.entity.AgentInfo;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+@Service
+public class AgentInfoService {
+
+    @Autowired
+    DaoProvider daoProvider;
+
+    public ResponseResult<List<AgentInfo>> getPage(AgentInfoQuery query) {
+        ResponseResult.ResponseResultBuilder<List<AgentInfo>> builder = ResponseResult.builder();
+        Integer pageSize = daoProvider.getAgentInfoDao().getCountByPage(query);
+        if (pageSize.intValue() > 0) {
+            query.getPage().setRecordCount(pageSize);
+            List<AgentInfo> listByPage = daoProvider.getAgentInfoDao().getListByPage(query);
+            builder.data(listByPage).page(query.getPage());
+        }
+        return builder.build().forOk();
+    }
+
+    public List<OptionItemVo> getAgentInfos() {
+        List<AgentInfo> agentInfos = daoProvider.getAgentInfoDao().getAgentInfoAll();
+        if (CollectionUtils.isNotEmpty(agentInfos)) {
+            return agentInfos.stream().filter(e -> Objects.nonNull(e.getAgentName())).map(e -> OptionItemVo.builder().value(e.getId()).text(e.getAgentName()).build()).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    public List<OptionItemVo> getAgentCorporationInfos() {
+        List<AgentInfo> agentInfos = daoProvider.getAgentInfoDao().getAgentInfoAll();
+        if (CollectionUtils.isNotEmpty(agentInfos)) {
+            return agentInfos.stream().filter(e -> Objects.nonNull(e.getCorporation())).map(e -> OptionItemVo.builder().value(e.getId()).text(e.getCorporation()).build()).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    public AgentInfo getAgentInfo(Long agentId) {
+        return daoProvider.getAgentInfoDao().getAgentInfo(agentId);
+    }
+
+    public boolean edit(AgentInfo record) {
+        record.setUpdateTime(new Date());
+        return daoProvider.getAgentInfoDao().edit(record);
+    }
+
+
+    public boolean add(AgentInfo record) {
+        record.setOpenAccountTime(new Date());
+        record.setCreateTime(new Date());
+        return daoProvider.getAgentInfoDao().add(record);
+    }
+
+
+}

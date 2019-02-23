@@ -1,0 +1,65 @@
+package com.emarbox.service.validator;
+
+import com.emarbox.dao.DaoProvider;
+import com.emarbox.dto.common.ResponseResult;
+import com.emarbox.enums.ValidType;
+import org.jooq.lambda.tuple.Tuple3;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+
+public class ValidationBaseService {
+
+
+    public Tuple3<Boolean, String, ValidType> getTuple3(Boolean isOk, String msg, ValidType vtype) {
+        return new Tuple3<Boolean, String, ValidType>(isOk, msg, vtype);
+    }
+
+    public Tuple3<Boolean, String, ValidType> getTuple3(Boolean isOk, String msg) {
+        return new Tuple3<Boolean, String, ValidType>(isOk, msg, ValidType.ALL);
+    }
+
+
+    public void getResponseResult(ValidType validType, List<Tuple3<Boolean, String, ValidType>> errorMsgList, ResponseResult<Map<String, Object>> stringResponseResult) {
+        errorMsgList = errorMsgList.stream().filter(validItem -> validItem.v3().equals(validType) || validItem.v3().equals(ValidType.ALL)).collect(Collectors.toList());
+        for (Tuple3<Boolean, String, ValidType> record : errorMsgList) {
+            if (record.v1().equals(Boolean.FALSE)) {
+                stringResponseResult.forFail(-1, record.v2());
+                break;
+            }
+        }
+        stringResponseResult.forOk();
+    }
+
+    protected boolean isMobile(String str) {
+        Pattern p = null;
+        Matcher m = null;
+        boolean b = false;
+        p = Pattern.compile("^[1][3,4,5,7,8][0-9]{9}$");
+        m = p.matcher(str);
+        b = m.matches();
+        return b;
+    }
+
+    protected boolean isPhone(String str) {
+        Pattern p1 = null, p2 = null;
+        Matcher m = null;
+        boolean b = false;
+        p1 = Pattern.compile("^[0][1-9]{2,3}-[0-9]{5,10}$");
+        if (str.length() > 9) {
+            m = p1.matcher(str);
+            b = m.matches();
+        } else {
+            m = p2.matcher(str);
+            b = m.matches();
+        }
+        return b;
+    }
+
+}

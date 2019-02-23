@@ -1,0 +1,4 @@
+package com.emarbox.mapper.parmary;
+
+public interface a {
+}
